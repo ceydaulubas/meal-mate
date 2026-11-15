@@ -4,11 +4,11 @@ let client: SupabaseClient | undefined;
 
 function readSupabaseConfig() {
   const url = import.meta.env.VITE_SUPABASE_URL;
-  const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
 
   if (!url || !anonKey) {
     throw new Error(
-      'Missing Supabase configuration. Set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your .env file.',
+      'Missing Supabase configuration. Set VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY in your .env file.',
     );
   }
 

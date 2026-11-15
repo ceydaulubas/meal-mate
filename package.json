@@ -15,6 +15,7 @@
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck",
     "test": "turbo run test",
+    "test:db": "supabase test db",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check": "pnpm lint && pnpm typecheck && pnpm test"
@@ -26,6 +27,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.14.0",
     "prettier": "^3.10.1",
+    "supabase": "^3.1.0",
     "turbo": "^2.11.11",
     "typescript": "~6.0.3",
     "typescript-eslint": "^8.72.2"
