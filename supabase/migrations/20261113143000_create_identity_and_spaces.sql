@@ -58,6 +58,19 @@ create unique index space_members_one_owner_idx
 
 create index space_members_user_id_idx on public.space_members (user_id);
 
+-- Fresh-install protection must commit with table creation. Policies are added
+-- by 20261113143200; until then RLS deliberately denies all browser access.
+-- Already-applied installations receive ACL hardening in 20261117120000.
+alter table public.profiles enable row level security;
+alter table public.spaces enable row level security;
+alter table public.space_members enable row level security;
+revoke all on table public.profiles, public.spaces, public.space_members
+  from public, anon, authenticated;
+grant select on table public.profiles, public.spaces, public.space_members
+  to authenticated;
+grant update (display_name, avatar_url) on table public.profiles
+  to authenticated;
+
 -- Internal functions are kept out of the PostgREST-exposed public schema.
 create schema if not exists private;
 revoke all on schema private from public;

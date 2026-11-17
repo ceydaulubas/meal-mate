@@ -1,5 +1,5 @@
 import { FullPageLoader } from '@/components/FullPageLoader';
-import { useAuth } from '@/features/auth/auth-context';
+import { useAuth } from '@/features/auth/session/auth-context';
 import { useDashboardData } from './use-dashboard-data';
 
 function formatDate(value: string): string {

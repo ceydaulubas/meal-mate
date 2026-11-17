@@ -1,6 +1,6 @@
 import { Navigate, Outlet } from 'react-router';
 import { FullPageLoader } from '@/components/FullPageLoader';
-import { useAuth } from '../auth-context';
+import { useAuth } from '../session/auth-context';
 
 export function GuestOnlyRoute() {
   const { isAuthenticated, isLoading } = useAuth();

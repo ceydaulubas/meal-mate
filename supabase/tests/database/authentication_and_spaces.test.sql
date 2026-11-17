@@ -276,6 +276,8 @@ select set_config(
   '{"sub":"11111111-1111-4111-8111-111111111111","role":"authenticated"}',
   true
 );
+-- Support both the image's legacy Auth helper and GoTrue-migrated helpers.
+select set_config('request.jwt.claim.sub', '11111111-1111-4111-8111-111111111111', true);
 set local role authenticated;
 
 select is(
@@ -402,6 +404,7 @@ select is(
 
 -- Unauthenticated clients have no table access.
 select set_config('request.jwt.claims', '{"role":"anon"}', true);
+select set_config('request.jwt.claim.sub', '', true);
 set local role anon;
 
 select throws_ok(

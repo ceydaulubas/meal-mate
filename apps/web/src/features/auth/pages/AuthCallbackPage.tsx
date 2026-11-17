@@ -2,7 +2,7 @@ import { useEffect } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 import { FullPageLoader } from '@/components/FullPageLoader';
 import { AuthCard } from '../components/AuthCard';
-import { useAuth } from '../auth-context';
+import { useAuth } from '../session/auth-context';
 
 export function AuthCallbackPage() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -10,13 +10,16 @@ export function AuthCallbackPage() {
   const [searchParams] = useSearchParams();
   const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
   const errorDescription =
-    searchParams.get('error_description') ?? hashParams.get('error_description');
+    searchParams.get('error_description') ??
+    hashParams.get('error_description') ??
+    searchParams.get('error') ??
+    hashParams.get('error');
 
   useEffect(() => {
-    if (!isLoading && isAuthenticated) {
+    if (!errorDescription && !isLoading && isAuthenticated) {
       void navigate('/dashboard', { replace: true });
     }
-  }, [isAuthenticated, isLoading, navigate]);
+  }, [errorDescription, isAuthenticated, isLoading, navigate]);
 
   if (errorDescription) {
     return (
@@ -45,8 +48,8 @@ export function AuthCallbackPage() {
 
   return (
     <AuthCard
-      title="Email confirmed"
-      description="Your email address is confirmed. Sign in to open your personal space."
+      title="Continue to sign in"
+      description="If you followed a confirmation link, try signing in to continue. We could not verify a session in this tab."
       footer={
         <Link to="/login" className="font-medium text-emerald-700 hover:text-emerald-800">
           Continue to sign in

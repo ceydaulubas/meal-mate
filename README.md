@@ -120,6 +120,8 @@ blank `display_name` falls back to the email prefix, then to `MealMate User`.
 - One `OWNER` per space (partial unique index on `space_members.space_id`).
 - Every space must have an `OWNER` before the transaction commits (deferred constraint triggers).
 - Personal spaces reject additional members and cannot be demoted or transferred.
+- Personal spaces cannot be deleted while their auth user exists. Deleting the
+  auth account still cascades through its profile, spaces, and memberships.
 - Space `type` and `created_by` are immutable.
 - Membership identity fields (`space_id`, `user_id`) are immutable.
 
@@ -138,6 +140,9 @@ A `private.is_space_member(uuid)` helper keeps space and membership policies non
 `SECURITY DEFINER` with `set search_path = ''`, `EXECUTE` revoked from `PUBLIC`, and granted only
 to `authenticated`.
 
+Trigger functions deny execution to `PUBLIC`, `anon`, and `authenticated`;
+the membership helper is the only private function executable by `authenticated`.
+
 ### Local database tests
 
 ```bash
@@ -149,6 +154,61 @@ pnpm test:db
 transaction. It covers trigger behavior, safe display-name fallbacks, duplicate personal spaces,
 duplicate owners, personal-space member rejection, missing owners, RLS visibility, cross-user
 profile updates, unauthorized membership writes, and role escalation.
+
+For a fresh migration rehearsal without touching any existing local database:
+
+```bash
+pnpm test:db:isolated
+```
+
+The Node.js harness (`scripts/test-db-isolated.mjs`) uses built-in modules and
+requires no Python installation. It rejects remote Docker contexts and all
+non-Unix-socket `DOCKER_HOST` endpoints before creating resources, then pins Docker
+and Supabase commands to the validated local endpoint.
+
+This creates its own temporary PostgreSQL 17 Docker container, bound only to
+loopback port 5432 (and refuses to run if that port is occupied). It runs
+`pnpm test:db --db-url ...` against
+both a fresh install and an upgrade from committed Task 02 (`0e416b7`), verifies
+existing rows survive the upgrade, and tests actual deferred constraint failures
+at `COMMIT`. It removes only the container it created, including its temporary
+volumes. Creation and startup are separate: the owned container ID is recorded
+before startup, and cleanup runs in `finally`, including after startup failure.
+If cleanup also fails, the original error is retained and the cleanup failure is
+reported separately. Snapshots are compared per table in primary-key order.
+The Supabase PostgreSQL image must be available locally or downloadable, and the
+historical commit `0e416b7` must exist in the checkout (including CI clones).
+This is a database rehearsal; it does not exercise GoTrue, email delivery, or a
+browser against a full isolated Supabase stack.
+
+Run `pnpm test:tooling` for Node tests of endpoint rejection and cleanup behavior.
+To exercise a real temporary-container startup failure and its cleanup, run
+`pnpm test:db:isolated --simulate-startup-failure`; a nonzero exit is expected.
+No existing container is used or removed. A daemon outage or force-killing the
+process can prevent cleanup; any cleanup failure includes the owned container ID.
+
+### Task 02 migration compatibility
+
+The initial migration now enables deny-by-default RLS and establishes minimal
+browser grants in the same transaction as table creation. The original policy
+migration and all four original version identifiers remain in place. Until the
+policy migration runs, authenticated reads return no rows.
+
+The new `20261117120000_harden_identity_and_spaces.sql` migration upgrades
+databases that already recorded the four original migrations. It installs the
+deletion guard and reasserts RLS and function/table privileges without replacing
+existing identity or space data. Existing databases do not need an old migration
+replayed, a migration-history repair, or a reset. The initial-file change is only
+for fresh installs; it cannot retroactively eliminate an earlier exposure window.
+Do not use this approach to rewrite migrations already deployed to Cloud.
+
+Existing auth users from before Task 02 are not backfilled automatically. Before
+Cloud deployment, verify the dedicated project identity and migration history,
+and confirm there are no auth users missing profiles or personal spaces. If there
+are, prepare and review a backfill before enabling the app. Verify Cloud function
+owners can bypass membership RLS, keep `private` out of exposed API schemas, and
+configure email confirmation, password requirements, SMTP, production redirects,
+and SPA fallback routes. Local `config.toml` does not apply these Cloud settings.
 
 ### Deploying migrations to Supabase Cloud
 
@@ -211,6 +271,12 @@ meal-mate/
 
 - **Feature-based frontend.** Business features belong in `apps/web/src/features`. App-wide
   routing, providers, and layouts stay in `src/app`.
+- **Authentication organization.** Within `features/auth`, `api/` contains Supabase calls,
+  `hooks/` coordinates sign-in/sign-up/sign-out, `session/` owns the auth context and
+  provider, and `guards/` protects routes. Pages and reusable auth UI stay in
+  `pages/` and `components/`; error-message helpers live in `utils/`. Tests stay
+  beside their implementation. The shared-contract validation test remains at
+  the feature root. Smaller features do not need these folders until they grow.
 - **Shared contracts.** `@meal-mate/contracts` exports TypeScript source directly. This is the Vite
   internal-package pattern: no separate build or watch process is needed for local development.
 - **Supabase.** `lib/supabase/client.ts` exposes a lazy singleton via `getSupabaseClient()`. It fails

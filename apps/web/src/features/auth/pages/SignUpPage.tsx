@@ -4,8 +4,8 @@ import { useForm } from 'react-hook-form';
 import { Link } from 'react-router';
 import { AuthCard } from '../components/AuthCard';
 import { AuthField } from '../components/AuthField';
-import { getAuthErrorMessage } from '../get-auth-error-message';
-import { useSignUp } from '../use-sign-up';
+import { getAuthErrorMessage } from '../utils/get-auth-error-message';
+import { useSignUp } from '../hooks/use-sign-up';
 
 export function SignUpPage() {
   const signUpMutation = useSignUp();

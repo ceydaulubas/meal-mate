@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { describe, expect, it } from 'vitest';
-import { AuthContext, type AuthContextValue } from '../auth-context';
+import { AuthContext, type AuthContextValue } from '../session/auth-context';
 import { ProtectedRoute } from './ProtectedRoute';
 
 function renderProtectedRoute(auth: AuthContextValue) {

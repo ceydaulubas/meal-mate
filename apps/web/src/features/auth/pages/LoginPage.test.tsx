@@ -3,10 +3,10 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter, Route, Routes } from 'react-router';
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { renderWithQueryClient } from '@/test/render';
-import { signIn } from '../api';
+import { signIn } from '../api/auth-api';
 import { LoginPage } from './LoginPage';
 
-vi.mock('../api', () => ({
+vi.mock('../api/auth-api', () => ({
   signIn: vi.fn(),
   signUp: vi.fn(),
   signOut: vi.fn(),

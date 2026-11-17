@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router';
 import { AppLayout } from '@/app/layouts/AppLayout';
-import { GuestOnlyRoute } from '@/features/auth/components/GuestOnlyRoute';
-import { ProtectedRoute } from '@/features/auth/components/ProtectedRoute';
+import { GuestOnlyRoute } from '@/features/auth/guards/GuestOnlyRoute';
+import { ProtectedRoute } from '@/features/auth/guards/ProtectedRoute';
 import { AuthCallbackPage } from '@/features/auth/pages/AuthCallbackPage';
 import { LoginPage } from '@/features/auth/pages/LoginPage';
 import { SignUpPage } from '@/features/auth/pages/SignUpPage';

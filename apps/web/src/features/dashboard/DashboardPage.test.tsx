@@ -1,7 +1,7 @@
 import { screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vitest';
 import { renderWithQueryClient } from '@/test/render';
-import { AuthContext } from '@/features/auth/auth-context';
+import { AuthContext } from '@/features/auth/session/auth-context';
 import { getDashboardData } from './api';
 import { DashboardPage } from './DashboardPage';
 

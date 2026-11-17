@@ -1,7 +1,7 @@
 import { Link, NavLink, Outlet } from 'react-router';
-import { useAuth } from '@/features/auth/auth-context';
-import { getAuthErrorMessage } from '@/features/auth/get-auth-error-message';
-import { useSignOut } from '@/features/auth/use-sign-out';
+import { useAuth } from '@/features/auth/session/auth-context';
+import { getAuthErrorMessage } from '@/features/auth/utils/get-auth-error-message';
+import { useSignOut } from '@/features/auth/hooks/use-sign-out';
 import { useUiStore } from '@/stores/ui-store';
 
 interface NavigationItem {
